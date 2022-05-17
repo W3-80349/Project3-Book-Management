@@ -73,8 +73,8 @@ const createUser = async function (req, res) {
         }
 
         // IF GIVEN DATA IS ERROR FREE THEN IT CREATE USER IN DB-----
-        let saved = await userModel.create(data)
-        res.status(201).send({ status: true, message: "Success", data: saved })
+        let user = await userModel.create(data)
+        res.status(201).send({ status: true, message: "Success", data: user })
     } catch (err) {
         res.status(500).send({ status: false, message: err.message })
     }
@@ -100,7 +100,7 @@ const loginUser = async function (req, res) {
             return res.status(400).send({ status: false, message: "Password is incorrect" })
         }
         // IF DOCUMENT FOUND THEN CREATE JWT TOKEN-----
-        const token = jwt.sign({ userId: user._id.toString() }, "This is project 3", { expiresIn: "2h" })
+        const token = jwt.sign({ userId: user._id.toString() }, process.env.SECRET_KEY, { expiresIn: "2h" })
 
         // SET TOKEN IN RESPONSE HEADER----
         res.setHeader("x-auth-token", token);

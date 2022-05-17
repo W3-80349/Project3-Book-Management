@@ -1,13 +1,13 @@
 const { isValidObjectId, default: mongoose, set } = require("mongoose")
 const BookModel = require("../models/BookModel")
 const ReviewModel = require("../models/ReviewModel")
-const UserModel = require("../models/UserModel")
 
 
 const createReview = async (req, res) => {
     try {
         let { reviewedBy, rating, review } = req.body
         let bookId = req.params.bookId
+
         if (!isValidObjectId(bookId)) {
             return res.status(400).send({ status: false, message: "'BOOK ID' is Invalid!" })
         }
@@ -31,16 +31,7 @@ const createReview = async (req, res) => {
         if (rating < 1 || rating > 5) {
             return res.status(401).send({ status: false, message: "Invalid value of rating, It should be betweeen 1 and 5" })
         }
-        let checkuser = await UserModel.findOne({ name: reviewedBy })
-        if (!checkuser) {
-            return res.status(404).send({ status: false, message: "NO USER FOUND" })
-        }
-        if (checkuser.isDeleted == true) {
-            return res.status(400).send({ status: false, message: " USER DELETED" })
-        }
-
-
-
+       
         let newReview = {
             bookId: bookId,
             reviewedBy: reviewedBy,
@@ -83,16 +74,6 @@ const updateReview = async (req, res) => {
         }
 
         if (Object.keys(req.body).length == 0) return res.status(400).send({ status: false, message: "No data in request body" })
-
-        // if (!reviewedBy) {
-        //     return res.status(400).send({ status: false, message: "ReviewedBy should be present in request Body" })
-        // }
-        // if (!rating) {
-        //     return res.status(400).send({ status: false, message: "Rating should be present in request Body" })
-        // }
-        // if (!review) {
-        //     return res.status(400).send({ status: false, message: "Review should be present in request Body" })
-        // }
 
         let isBookExist = await BookModel.findOne({ _id: bookId, isDeleted: false })
         if (!isBookExist) {
@@ -153,7 +134,7 @@ const deleteReview = async (req, res) => {
         let deletedReview = await ReviewModel.findOneAndUpdate({ _id: reviewId, isDeleted: false }, { isDeleted: true, deletedAt: Date() }, { new: true })
 
         if (deletedReview) {
-            let updateBook = await BookModel.findOneAndUpdate({ _id: bookId }, { $inc: { reviews: -1 } })
+            let updatedBook = await BookModel.findOneAndUpdate({ _id: bookId }, { $inc: { reviews: -1 } })
         }
 
         return res.status(200).send({ status: true, message: " review Deleted !", data: deletedReview })

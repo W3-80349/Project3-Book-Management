@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bookModel = require("../models/BookModel")
+require("dotenv").config()
 
 
 const authentication = (req,res,next)=>{
@@ -8,17 +9,18 @@ const authentication = (req,res,next)=>{
     if (!token) {
        return res.status(400).send({ status:false,message: "no token found" })
     }
-    let decodedToken = jwt.verify(token, "This is project 3")
+    let decodedToken = jwt.verify(token, process.env.SECRET_KEY)
     if(!decodedToken){
        return res.staus(401).send({status:false,message:"Invalid token"})
     }
-    req.decodedToken=decodedToken
    
     next();
 }catch(err){
     res.status(500).send({status:false,message:err.message})
 }
 }
+
+
 const authorization=async (req, res, next)=>{
     try{
     let token = req.headers["x-auth-token"||"X-Auth-Token"]
